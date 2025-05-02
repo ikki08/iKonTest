@@ -12,7 +12,6 @@
 @interface BaseViewController : UIViewController <BaseViewModelDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *postTableView;
-@property (strong, nonatomic) BaseViewModel *viewModel;
 
 @end
 

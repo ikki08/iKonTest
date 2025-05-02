@@ -15,8 +15,8 @@
     if(self) {
         self.userId = [[dict objectForKey:@"userId"] integerValue];
         self.postId = [[dict objectForKey:@"id"] integerValue];
-        self.title = [[dict objectForKey:@"title"] stringValue];
-        self.body = [[dict objectForKey:@"body"] stringValue];
+        self.title = [dict objectForKey:@"title"];
+        self.body = [dict objectForKey:@"body"];
     }
     
     return self;
