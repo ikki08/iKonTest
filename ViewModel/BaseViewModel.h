@@ -15,15 +15,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)fetchDataDidSuccess;
 - (void)fetchDataDidFailWithError:(NSError *)error;
+- (void)filterPostsDidFinish;
 
 @end
 
 @interface BaseViewModel : NSObject
 
-@property (strong, nonatomic) NSArray *posts;
+@property (strong, nonatomic, readonly) NSArray *filteredPosts;
 @property (weak, nonatomic) id <BaseViewModelDelegate> delegate;
 
 - (void)fetchData;
+- (void)filterPostsWithKeyword:(NSString *)keyword;
 
 @end
 

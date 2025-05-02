@@ -11,8 +11,9 @@
 #import "DetailViewModel.h"
 #import "Post.h"
 
-@interface BaseViewController ()
+@interface BaseViewController () <UISearchResultsUpdating>
 
+@property (strong, nonatomic) UISearchController *searchController;
 @property (strong, nonatomic) BaseViewModel *viewModel;
 @property (strong, nonatomic) Post *selectedPost;
 
@@ -27,6 +28,20 @@
     self.viewModel = [[BaseViewModel alloc] init];
     self.viewModel.delegate = self;
     [self.viewModel fetchData];
+    
+    [self setupSearchController];
+}
+
+- (void)setupSearchController {
+    self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+    self.searchController.searchResultsUpdater = self;
+    self.searchController.obscuresBackgroundDuringPresentation = NO;
+    self.searchController.searchBar.placeholder = @"Cari judul post...";
+
+    self.navigationItem.searchController = self.searchController;
+    self.navigationItem.hidesSearchBarWhenScrolling = NO;
+
+    self.definesPresentationContext = YES;
 }
 
 #pragma mark - Navigation
@@ -40,10 +55,18 @@
     }
 }
 
+#pragma mark - UISearchResultsUpdating
+
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController {
+    NSString *searchText = searchController.searchBar.text;
+    
+    [self.viewModel filterPostsWithKeyword: searchText];
+}
+
 #pragma mark - Table View Data source
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.viewModel.posts.count;
+    return self.viewModel.filteredPosts.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -55,7 +78,7 @@
         UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
     }
     
-    Post *post = [self.viewModel.posts objectAtIndex:indexPath.row];
+    Post *post = [self.viewModel.filteredPosts objectAtIndex:indexPath.row];
     cell.textLabel.numberOfLines = 0;
     cell.textLabel.lineBreakMode = NSLineBreakByWordWrapping;
     cell.textLabel.text = [NSString stringWithFormat:@"%ld %@", (long)post.postId, post.title];
@@ -70,7 +93,7 @@
 #pragma mark - Table View Data delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    self.selectedPost = [self.viewModel.posts objectAtIndex:indexPath.row];
+    self.selectedPost = [self.viewModel.filteredPosts objectAtIndex:indexPath.row];
     [self performSegueWithIdentifier:@"showDetail" sender:self];
 }
 
@@ -98,6 +121,10 @@
     [alert addAction:okAction];
 
     [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)filterPostsDidFinish {
+    [self.postTableView reloadData];
 }
 
 @end

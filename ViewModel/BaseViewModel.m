@@ -9,7 +9,18 @@
 #import "BaseViewModel.h"
 #import "Post.h"
 
+@interface BaseViewModel ()
+
+@property (strong, nonatomic) NSArray *posts;
+@property (strong, nonatomic) NSArray *privateFilteredPosts;
+
+@end
+
 @implementation BaseViewModel
+
+- (NSArray *)filteredPosts {
+    return self.privateFilteredPosts ?: self.posts;
+}
 
 - (void)fetchData {
     NSString *dataUrl = @"https://jsonplaceholder.typicode.com/posts";
@@ -48,6 +59,25 @@
     }];
 
     [downloadTask resume];
+}
+
+- (void)filterPostsWithKeyword:(NSString *)keyword {
+    if (keyword.length == 0) {
+        self.privateFilteredPosts = nil;
+        [self.delegate filterPostsDidFinish];
+
+        return;
+    }
+
+    NSMutableArray *results = [NSMutableArray array];
+    for (Post *post in self.posts) {
+        if ([[post.title lowercaseString] containsString:[keyword lowercaseString]]) {
+            [results addObject:post];
+        }
+    }
+    
+    self.privateFilteredPosts = results;
+    [self.delegate filterPostsDidFinish];
 }
 
 @end
